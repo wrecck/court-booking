@@ -12,9 +12,7 @@ export function SiteHeader() {
           <a href="#payments" className="transition hover:text-white">Payments</a>
           <a href="#launch" className="transition hover:text-white">For venues</a>
         </nav>
-        <Link href="/book/baseline" className="focus-ring inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-bold text-[#17442f] shadow-sm transition hover:-translate-y-0.5">
-          View live flow <ArrowUpRight size={16} />
-        </Link>
+        <div className="flex items-center gap-3"><Link href="/login" className="text-sm font-bold text-white">Sign in</Link><Link href="/register" className="focus-ring inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-bold text-[#17442f] shadow-sm transition hover:-translate-y-0.5">Register venue <ArrowUpRight size={16} /></Link></div>
       </div>
     </header>
   );

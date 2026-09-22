@@ -25,7 +25,7 @@ export default function Home() {
             <p className="mt-7 max-w-xl text-lg leading-8 text-white/68">Give players a faster way to book and pay. Give your team fewer messages, fewer spreadsheets, and no double bookings.</p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Link href="/book/baseline" className="focus-ring inline-flex items-center justify-center gap-2 rounded-full bg-[#cbe86b] px-6 py-3.5 font-bold text-[#173020] transition hover:-translate-y-0.5 hover:bg-[#d8f37c]">Try the booking flow <ArrowRight size={18} /></Link>
-              <Link href="/admin" className="focus-ring inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3.5 font-bold text-white transition hover:bg-white/10">Open venue dashboard</Link>
+              <Link href="/register" className="focus-ring inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3.5 font-bold text-white transition hover:bg-white/10">Create your venue</Link>
             </div>
             <div className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/62">
               {["15-minute setup path", "Manual & automatic payments", "Mobile-first"].map((item) => <span key={item} className="inline-flex items-center gap-2"><Check size={15} className="text-[#cbe86b]" />{item}</span>)}
@@ -67,7 +67,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="launch" className="px-5 py-24 sm:px-8"><div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 rounded-[36px] bg-[#f08b6c] px-8 py-12 text-[#3a2118] sm:px-12 lg:flex-row lg:items-center"><div><p className="text-xs font-extrabold uppercase tracking-[.18em]">MVP foundation</p><h2 className="display mt-3 max-w-2xl text-3xl font-extrabold sm:text-4xl">Ready to turn a real venue into the first design partner.</h2></div><Link href="/admin" className="focus-ring inline-flex shrink-0 items-center gap-2 rounded-full bg-[#2f211c] px-6 py-3.5 font-bold text-white">Explore admin <ArrowRight size={18} /></Link></div></section>
+      <section id="launch" className="px-5 py-24 sm:px-8"><div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 rounded-[36px] bg-[#f08b6c] px-8 py-12 text-[#3a2118] sm:px-12 lg:flex-row lg:items-center"><div><p className="text-xs font-extrabold uppercase tracking-[.18em]">MVP foundation</p><h2 className="display mt-3 max-w-2xl text-3xl font-extrabold sm:text-4xl">Ready to turn a real venue into the first design partner.</h2></div><Link href="/demo/admin" className="focus-ring inline-flex shrink-0 items-center gap-2 rounded-full bg-[#2f211c] px-6 py-3.5 font-bold text-white">Explore admin demo <ArrowRight size={18} /></Link></div></section>
     </main>
   );
 }
