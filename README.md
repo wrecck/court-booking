@@ -95,7 +95,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the booking invariant, paym
 - `/admin/settings/payments` — payment-method and hold settings
 - `/login` — Supabase staff login
 - `/register` — register a new venue
-- `/register/complete` — complete setup after email confirmation
+- `/register/complete` — fallback setup for accounts created before automatic provisioning
 - `/tenant/{slug}` — each venue's own booking page
 - `/platform` — operator-only list of venues and hold settings
 

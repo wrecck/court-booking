@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 const registration = z.object({
@@ -25,10 +26,30 @@ export async function register(formData: FormData) {
       ...(origin ? { emailRedirectTo: `${origin}/auth/callback?next=/register/complete` } : {}),
     },
   });
-  if (error || !data.user) redirect(`/register?error=${encodeURIComponent(error?.message ?? "Unable to create account.")}`);
-  if (!data.session) redirect("/register?success=Check%20your%20email%20to%20confirm%20your%20account.%20Then%20sign%20in%20to%20finish%20setup.");
-  const { error: provisionError } = await supabase.rpc("register_tenant", { p_name: name, p_slug: slug });
-  if (provisionError) redirect(`/register/complete?error=${encodeURIComponent(provisionError.message.includes("slug_taken") ? "That URL is already in use." : "Unable to create venue. Please try another URL.")}`);
+  if (error || !data.user) {
+    const message = error?.code === "over_email_send_rate_limit"
+      ? "Too many confirmation emails were requested. Please wait a few minutes and try again."
+      : error?.message ?? "Unable to create account.";
+    redirect(`/register?error=${encodeURIComponent(message)}`);
+  }
+  if (data.user.identities?.length === 0) {
+    redirect("/login?error=An%20account%20with%20that%20email%20already%20exists.");
+  }
+
+  const admin = createAdminClient();
+  const { error: provisionError } = await admin.rpc("provision_tenant", {
+    p_user_id: data.user.id,
+    p_name: name,
+    p_slug: slug,
+  });
+  if (provisionError) {
+    await admin.auth.admin.deleteUser(data.user.id);
+    const message = provisionError.message.includes("slug_taken")
+      ? "That booking page URL is already in use."
+      : "Your account could not be completed. Please try again.";
+    redirect(`/register?error=${encodeURIComponent(message)}`);
+  }
+  if (!data.session) redirect("/register?success=Your%20venue%20is%20ready.%20Check%20your%20email%20to%20confirm%20your%20account%2C%20then%20sign%20in.");
   redirect("/admin");
 }
 
