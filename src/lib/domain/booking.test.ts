@@ -15,10 +15,35 @@ const request = {
 };
 
 describe("booking domain", () => {
-  it("accepts a valid one-hour hold", () => expect(holdRequestSchema.safeParse(request).success).toBe(true));
-  it("rejects a reversed interval", () => expect(holdRequestSchema.safeParse({ ...request, endsAt: "2026-09-21T17:00:00+08:00" }).success).toBe(false));
+  it("accepts a valid one-hour hold", () =>
+    expect(holdRequestSchema.safeParse(request).success).toBe(true));
+  it("accepts a valid two-hour hold", () =>
+    expect(
+      holdRequestSchema.safeParse({
+        ...request,
+        endsAt: "2026-09-21T20:00:00+08:00",
+      }).success,
+    ).toBe(true));
+  it("rejects a booking longer than two hours", () =>
+    expect(
+      holdRequestSchema.safeParse({
+        ...request,
+        endsAt: "2026-09-21T21:00:00+08:00",
+      }).success,
+    ).toBe(false));
+  it("rejects a reversed interval", () =>
+    expect(
+      holdRequestSchema.safeParse({
+        ...request,
+        endsAt: "2026-09-21T17:00:00+08:00",
+      }).success,
+    ).toBe(false));
   it("only blocks availability for active reservation states", () => {
-    expect(["held", "pending_payment_review", "confirmed"].every(isBlockingStatus)).toBe(true);
-    expect(["expired", "cancelled", "rejected"].some(isBlockingStatus)).toBe(false);
+    expect(
+      ["held", "pending_payment_review", "confirmed"].every(isBlockingStatus),
+    ).toBe(true);
+    expect(["expired", "cancelled", "rejected"].some(isBlockingStatus)).toBe(
+      false,
+    );
   });
 });

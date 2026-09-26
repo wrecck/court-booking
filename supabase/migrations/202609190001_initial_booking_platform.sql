@@ -23,6 +23,7 @@ create table public.organizations (
   timezone text not null default 'Asia/Manila',
   initial_hold_minutes integer not null default 15 check (initial_hold_minutes between 5 and 60),
   manual_review_minutes integer not null default 45 check (manual_review_minutes between 10 and 1440),
+  max_booking_hours smallint not null default 2 check (max_booking_hours between 1 and 2),
   is_active boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -119,7 +120,7 @@ create table public.bookings (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   check (ends_at > starts_at),
-  check (ends_at <= starts_at + interval '4 hours'),
+  check (ends_at <= starts_at + interval '2 hours'),
   check ((status in ('held', 'pending_payment_review') and hold_expires_at is not null) or status not in ('held', 'pending_payment_review')),
   constraint no_overlapping_active_bookings exclude using gist (
     court_id with =,
@@ -253,17 +254,19 @@ language plpgsql security definer set search_path = public, extensions, pg_temp
 as $$
 declare
   v_hold_minutes integer;
+  v_max_booking_hours integer;
   v_location_id uuid;
   v_booking_id uuid;
   v_reference text;
   v_expires_at timestamptz;
   v_guest_token text := encode(gen_random_bytes(24), 'hex');
 begin
-  if p_ends_at <= p_starts_at or p_ends_at > p_starts_at + interval '4 hours' then raise exception 'invalid_booking_interval' using errcode = '22023'; end if;
+  if p_ends_at not in (p_starts_at + interval '1 hour', p_starts_at + interval '2 hours') then raise exception 'invalid_booking_interval' using errcode = '22023'; end if;
   select c.location_id into v_location_id from public.courts c where c.id = p_court_id and c.organization_id = p_organization_id and c.is_active;
   if v_location_id is null then raise exception 'court_not_found' using errcode = 'P0002'; end if;
-  select o.initial_hold_minutes into v_hold_minutes from public.organizations o where o.id = p_organization_id and o.is_active;
+  select o.initial_hold_minutes, o.max_booking_hours into v_hold_minutes, v_max_booking_hours from public.organizations o where o.id = p_organization_id and o.is_active;
   if v_hold_minutes is null then raise exception 'organization_not_found' using errcode = 'P0002'; end if;
+  if p_ends_at > p_starts_at + make_interval(hours => v_max_booking_hours) then raise exception 'booking_duration_not_allowed' using errcode = '22023'; end if;
   update public.bookings as b
   set status = 'expired', updated_at = now()
   where b.court_id = p_court_id

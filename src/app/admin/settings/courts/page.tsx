@@ -1,9 +1,148 @@
 import { requireTenant } from "@/lib/tenants";
-import { saveCourt } from "./actions";
+import { saveBookingRules, saveCourt } from "./actions";
 
 export default async function CourtSettingsPage() {
   const { supabase, organization, role } = await requireTenant();
-  const { data: courts } = await supabase.from("courts").select("id,name,surface,is_active,hourly_rate_minor").eq("organization_id", organization.id).order("sort_order");
+  const [{ data: courts }, { data: settings }] = await Promise.all([
+    supabase
+      .from("courts")
+      .select("id,name,surface,is_active,hourly_rate_minor")
+      .eq("organization_id", organization.id)
+      .order("sort_order"),
+    supabase
+      .from("organizations")
+      .select("max_booking_hours")
+      .eq("id", organization.id)
+      .single(),
+  ]);
   const canEdit = role === "owner" || role === "admin";
-  return <main className="mx-auto max-w-5xl"><h1 className="display text-3xl font-extrabold">Courts</h1><p className="mt-2 text-[#718076]">Set the courts and hourly prices shown on your booking page.</p><div className="mt-8 grid gap-4">{courts?.map((court) => <form key={court.id} action={saveCourt} className="flex flex-wrap items-end gap-3 rounded-2xl border bg-white p-5"><input type="hidden" name="id" value={court.id} /><label className="text-sm font-bold">Name<input name="name" required defaultValue={court.name} className="mt-1 block rounded-lg border p-2" /></label><label className="text-sm font-bold">Surface<input name="surface" defaultValue={court.surface ?? ""} className="mt-1 block rounded-lg border p-2" /></label><label className="text-sm font-bold">Hourly rate (₱)<input name="rate" type="number" min="0" max="100000" required defaultValue={court.hourly_rate_minor / 100} className="mt-1 block w-28 rounded-lg border p-2" /></label><label className="flex items-center gap-2 pb-2 text-sm"><input name="active" type="checkbox" defaultChecked={court.is_active} />Active</label>{canEdit && <button className="rounded-lg bg-[#235c43] px-4 py-2 text-sm font-bold text-white">Save court</button>}</form>)}{canEdit && <form action={saveCourt} className="flex flex-wrap items-end gap-3 rounded-2xl border bg-white p-5"><label className="text-sm font-bold">New court<input name="name" required placeholder="Court 2" className="mt-1 block rounded-lg border p-2" /></label><label className="text-sm font-bold">Surface<input name="surface" placeholder="Hard" className="mt-1 block rounded-lg border p-2" /></label><label className="text-sm font-bold">Hourly rate (₱)<input name="rate" type="number" min="0" max="100000" required defaultValue="500" className="mt-1 block w-28 rounded-lg border p-2" /></label><input type="hidden" name="active" value="on" /><button className="rounded-lg bg-[#235c43] px-4 py-2 text-sm font-bold text-white">Add court</button></form>}</div></main>;
+  return (
+    <main className="mx-auto max-w-5xl">
+      <h1 className="display text-3xl font-extrabold">Courts</h1>
+      <p className="mt-2 text-[#718076]">
+        Set the courts, hourly prices, and booking duration shown on your
+        booking page.
+      </p>
+      {canEdit && (
+        <form
+          action={saveBookingRules}
+          className="mt-8 flex flex-wrap items-end gap-4 rounded-2xl border bg-white p-5"
+        >
+          <div>
+            <h2 className="font-bold">Booking duration</h2>
+            <p className="mt-1 text-sm text-[#718076]">
+              Choose the longest reservation customers may make.
+            </p>
+          </div>
+          <label className="text-sm font-bold">
+            Maximum duration
+            <select
+              name="maxBookingHours"
+              defaultValue={settings?.max_booking_hours ?? 2}
+              className="mt-1 block rounded-lg border p-2"
+            >
+              <option value="1">1 hour</option>
+              <option value="2">2 hours</option>
+            </select>
+          </label>
+          <button className="rounded-lg bg-[#235c43] px-4 py-2 text-sm font-bold text-white">
+            Save booking rules
+          </button>
+        </form>
+      )}
+      <div className="mt-6 grid gap-4">
+        {courts?.map((court) => (
+          <form
+            key={court.id}
+            action={saveCourt}
+            className="flex flex-wrap items-end gap-3 rounded-2xl border bg-white p-5"
+          >
+            <input type="hidden" name="id" value={court.id} />
+            <label className="text-sm font-bold">
+              Name
+              <input
+                name="name"
+                required
+                defaultValue={court.name}
+                className="mt-1 block rounded-lg border p-2"
+              />
+            </label>
+            <label className="text-sm font-bold">
+              Surface
+              <input
+                name="surface"
+                defaultValue={court.surface ?? ""}
+                className="mt-1 block rounded-lg border p-2"
+              />
+            </label>
+            <label className="text-sm font-bold">
+              Hourly rate (₱)
+              <input
+                name="rate"
+                type="number"
+                min="0"
+                max="100000"
+                required
+                defaultValue={court.hourly_rate_minor / 100}
+                className="mt-1 block w-28 rounded-lg border p-2"
+              />
+            </label>
+            <label className="flex items-center gap-2 pb-2 text-sm">
+              <input
+                name="active"
+                type="checkbox"
+                defaultChecked={court.is_active}
+              />
+              Active
+            </label>
+            {canEdit && (
+              <button className="rounded-lg bg-[#235c43] px-4 py-2 text-sm font-bold text-white">
+                Save court
+              </button>
+            )}
+          </form>
+        ))}
+        {canEdit && (
+          <form
+            action={saveCourt}
+            className="flex flex-wrap items-end gap-3 rounded-2xl border bg-white p-5"
+          >
+            <label className="text-sm font-bold">
+              New court
+              <input
+                name="name"
+                required
+                placeholder="Court 2"
+                className="mt-1 block rounded-lg border p-2"
+              />
+            </label>
+            <label className="text-sm font-bold">
+              Surface
+              <input
+                name="surface"
+                placeholder="Hard"
+                className="mt-1 block rounded-lg border p-2"
+              />
+            </label>
+            <label className="text-sm font-bold">
+              Hourly rate (₱)
+              <input
+                name="rate"
+                type="number"
+                min="0"
+                max="100000"
+                required
+                defaultValue="500"
+                className="mt-1 block w-28 rounded-lg border p-2"
+              />
+            </label>
+            <input type="hidden" name="active" value="on" />
+            <button className="rounded-lg bg-[#235c43] px-4 py-2 text-sm font-bold text-white">
+              Add court
+            </button>
+          </form>
+        )}
+      </div>
+    </main>
+  );
 }
