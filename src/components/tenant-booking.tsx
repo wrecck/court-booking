@@ -80,6 +80,45 @@ export function TenantBooking({
       currency: venue.currency,
     }).format(value / 100);
 
+  function isRangeBlocked(startHour: number, bookingHours: number) {
+    const startsAt = new Date(
+      `${day}T${String(startHour).padStart(2, "0")}:00:00+08:00`,
+    ).getTime();
+
+    return (
+      startsAt < currentTime ||
+      startHour + bookingHours > 22 ||
+      occupied.some(
+        (slot) =>
+          startsAt < new Date(slot.endsAt).getTime() &&
+          startsAt + bookingHours * 3600000 > new Date(slot.startsAt).getTime(),
+      )
+    );
+  }
+
+  function selectHour(selectedHour: number) {
+    if (
+      hour !== null &&
+      durationHours === 1 &&
+      venue.max_booking_hours >= 2 &&
+      selectedHour === hour + 1 &&
+      !isRangeBlocked(hour, 2)
+    ) {
+      setDurationHours(2);
+      return;
+    }
+
+    if (
+      hour !== null &&
+      selectedHour > hour &&
+      selectedHour < hour + durationHours
+    ) {
+      return;
+    }
+
+    setHour(selectedHour);
+  }
+
   useEffect(() => {
     if (!courtId) return;
     const controller = new AbortController();
@@ -395,28 +434,30 @@ export function TenantBooking({
                 Available start times · {durationHours}{" "}
                 {durationHours === 1 ? "hour" : "hours"}
               </h3>
+              {venue.max_booking_hours >= 2 && (
+                <p className="mt-1 text-sm text-[#718076]">
+                  Select a start time, then tap the next hour to extend the
+                  booking to two hours.
+                </p>
+              )}
               <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-5">
                 {Array.from({ length: 15 }, (_, index) => index + 7).map(
                   (item) => {
                     const startsAt = new Date(
                       `${day}T${String(item).padStart(2, "0")}:00:00+08:00`,
                     ).getTime();
-                    const blocked =
-                      startsAt < currentTime ||
-                      item + durationHours > 22 ||
-                      occupied.some(
-                        (slot) =>
-                          startsAt < new Date(slot.endsAt).getTime() &&
-                          startsAt + durationHours * 3600000 >
-                            new Date(slot.startsAt).getTime(),
-                      );
+                    const blocked = isRangeBlocked(item, durationHours);
+                    const selected =
+                      hour !== null &&
+                      item >= hour &&
+                      item < hour + durationHours;
                     return (
                       <button
                         key={item}
                         type="button"
                         disabled={blocked}
-                        onClick={() => setHour(item)}
-                        className={`rounded-xl border p-3 text-sm font-bold ${blocked ? "bg-gray-100 text-gray-400" : hour === item ? "bg-[#235c43] text-white" : "hover:border-[#235c43]"}`}
+                        onClick={() => selectHour(item)}
+                        className={`rounded-xl border p-3 text-sm font-bold ${selected ? "border-[#235c43] bg-[#235c43] text-white" : blocked ? "bg-gray-100 text-gray-400" : "hover:border-[#235c43]"}`}
                       >
                         {new Date(startsAt).toLocaleTimeString("en-PH", {
                           timeZone: "Asia/Manila",
