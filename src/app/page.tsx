@@ -24,7 +24,7 @@ export default function Home() {
             <h1 className="display max-w-3xl text-5xl font-extrabold leading-[1.02] sm:text-6xl lg:text-7xl">Court booking without the <span className="text-[#cbe86b]">back-and-forth.</span></h1>
             <p className="mt-7 max-w-xl text-lg leading-8 text-white/68">Give players a faster way to book and pay. Give your team fewer messages, fewer spreadsheets, and no double bookings.</p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <Link href="/book/baseline" className="focus-ring inline-flex items-center justify-center gap-2 rounded-full bg-[#cbe86b] px-6 py-3.5 font-bold text-[#173020] transition hover:-translate-y-0.5 hover:bg-[#d8f37c]">Try the booking flow <ArrowRight size={18} /></Link>
+              <Link href="/tenant/baseline" prefetch={false} className="focus-ring inline-flex items-center justify-center gap-2 rounded-full bg-[#cbe86b] px-6 py-3.5 font-bold text-[#173020] transition hover:-translate-y-0.5 hover:bg-[#d8f37c]">Try the booking flow <ArrowRight size={18} /></Link>
               <Link href="/register" className="focus-ring inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3.5 font-bold text-white transition hover:bg-white/10">Create your venue</Link>
             </div>
             <div className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/62">
