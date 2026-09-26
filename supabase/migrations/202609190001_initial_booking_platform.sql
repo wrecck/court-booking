@@ -264,7 +264,11 @@ begin
   if v_location_id is null then raise exception 'court_not_found' using errcode = 'P0002'; end if;
   select o.initial_hold_minutes into v_hold_minutes from public.organizations o where o.id = p_organization_id and o.is_active;
   if v_hold_minutes is null then raise exception 'organization_not_found' using errcode = 'P0002'; end if;
-  update public.bookings set status = 'expired', updated_at = now() where court_id = p_court_id and status in ('held', 'pending_payment_review') and hold_expires_at <= now();
+  update public.bookings as b
+  set status = 'expired', updated_at = now()
+  where b.court_id = p_court_id
+    and b.status in ('held', 'pending_payment_review')
+    and b.hold_expires_at <= now();
   v_expires_at := now() + make_interval(mins => v_hold_minutes);
   begin
     insert into public.bookings (organization_id, location_id, court_id, starts_at, ends_at, hold_expires_at, customer_name, customer_email, customer_phone, player_count, amount_minor, currency, guest_token_hash)
