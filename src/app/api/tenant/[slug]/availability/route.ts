@@ -18,5 +18,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     .lt("starts_at", new Date(start.getTime() + 86400000).toISOString())
     .gt("ends_at", start.toISOString());
   if (error) return Response.json({ error: "Unable to load availability." }, { status: 500 });
-  return Response.json({ occupied: data?.filter((b) => b.status === "confirmed" || (b.hold_expires_at && new Date(b.hold_expires_at).getTime() > Date.now())).map((b) => ({ startsAt: b.starts_at, endsAt: b.ends_at })) ?? [] });
+  return Response.json(
+    { occupied: data?.filter((b) => b.status === "confirmed" || (b.hold_expires_at && new Date(b.hold_expires_at).getTime() > Date.now())).map((b) => ({ startsAt: b.starts_at, endsAt: b.ends_at })) ?? [] },
+    { headers: { "Cache-Control": "no-store" } },
+  );
 }
