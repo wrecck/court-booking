@@ -1,4 +1,5 @@
 import { requireTenant } from "@/lib/tenants";
+import { SubmitButton } from "@/components/submit-button";
 import { saveBookingRules, saveCourt } from "./actions";
 
 export default async function CourtSettingsPage() {
@@ -45,9 +46,12 @@ export default async function CourtSettingsPage() {
               <option value="2">2 hours</option>
             </select>
           </label>
-          <button className="rounded-lg bg-[#235c43] px-4 py-2 text-sm font-bold text-white">
+          <SubmitButton
+            pendingText="Saving…"
+            className="rounded-lg bg-[#235c43] px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
+          >
             Save booking rules
-          </button>
+          </SubmitButton>
         </form>
       )}
       <div className="mt-6 grid gap-4">
@@ -96,9 +100,12 @@ export default async function CourtSettingsPage() {
               Active
             </label>
             {canEdit && (
-              <button className="rounded-lg bg-[#235c43] px-4 py-2 text-sm font-bold text-white">
+              <SubmitButton
+                pendingText="Saving…"
+                className="rounded-lg bg-[#235c43] px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
+              >
                 Save court
-              </button>
+              </SubmitButton>
             )}
           </form>
         ))}
@@ -137,9 +144,12 @@ export default async function CourtSettingsPage() {
               />
             </label>
             <input type="hidden" name="active" value="on" />
-            <button className="rounded-lg bg-[#235c43] px-4 py-2 text-sm font-bold text-white">
+            <SubmitButton
+              pendingText="Adding…"
+              className="rounded-lg bg-[#235c43] px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
+            >
               Add court
-            </button>
+            </SubmitButton>
           </form>
         )}
       </div>

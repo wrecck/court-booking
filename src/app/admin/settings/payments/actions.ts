@@ -20,23 +20,21 @@ export async function savePaymentMethod(formData: FormData) {
     accountNumber.length < 5
   )
     throw new Error("Complete the payment recipient details.");
-  const { error } = await supabase
-    .from("venue_payment_methods")
-    .insert({
-      organization_id: organization.id,
-      display_name: displayName,
-      provider,
-      type,
-      mode: "manual",
-      account_name: accountName,
-      account_number: accountNumber,
-      bank_name:
-        provider === "bank"
-          ? String(formData.get("bankName") ?? "").trim()
-          : null,
-      instructions: String(formData.get("instructions") ?? "").trim(),
-      is_enabled: true,
-    });
+  const { error } = await supabase.from("venue_payment_methods").insert({
+    organization_id: organization.id,
+    display_name: displayName,
+    provider,
+    type,
+    mode: "manual",
+    account_name: accountName,
+    account_number: accountNumber,
+    bank_name:
+      provider === "bank"
+        ? String(formData.get("bankName") ?? "").trim()
+        : null,
+    instructions: String(formData.get("instructions") ?? "").trim(),
+    is_enabled: true,
+  });
   if (error) throw new Error("Unable to add payment method.");
   revalidatePath("/admin/settings/payments");
   revalidatePath(`/tenant/${organization.slug}`);
@@ -78,6 +76,22 @@ export async function togglePaymentMethod(formData: FormData) {
     .eq("organization_id", organization.id)
     .eq("mode", "manual");
   if (error) throw new Error("Unable to update payment method.");
+  revalidatePath("/admin/settings/payments");
+  revalidatePath(`/tenant/${organization.slug}`);
+}
+
+export async function deletePaymentMethod(formData: FormData) {
+  const { supabase, organization, role } = await requireTenant();
+  if (!["owner", "admin", "platform_operator"].includes(role))
+    throw new Error("Only venue admins can change payment settings.");
+  const id = String(formData.get("id") ?? "");
+  const { error } = await supabase
+    .from("venue_payment_methods")
+    .delete()
+    .eq("id", id)
+    .eq("organization_id", organization.id)
+    .eq("mode", "manual");
+  if (error) throw new Error("Unable to delete payment method.");
   revalidatePath("/admin/settings/payments");
   revalidatePath(`/tenant/${organization.slug}`);
 }

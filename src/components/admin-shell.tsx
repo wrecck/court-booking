@@ -15,6 +15,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { cn } from "@/lib/utils";
 import { signOut } from "@/app/login/actions";
 import { switchTenant } from "@/app/admin/actions";
+import { FormPendingIndicator, SubmitButton } from "@/components/submit-button";
 
 const nav = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
@@ -81,6 +82,7 @@ export function AdminShell({
                       </option>
                     ))}
                   </select>
+                  <FormPendingIndicator className="text-white/60" />
                 </form>
               ) : (
                 <span className="block truncate text-sm font-bold">
@@ -128,9 +130,12 @@ export function AdminShell({
             </Link>
           )}
           <form action={signOut}>
-            <button className="mt-2 text-sm font-bold text-white/70">
+            <SubmitButton
+              pendingText="Signing out…"
+              className="mt-2 text-sm font-bold text-white/70 disabled:opacity-60"
+            >
               Sign out
-            </button>
+            </SubmitButton>
           </form>
         </div>
       </aside>

@@ -1,5 +1,6 @@
 "use client";
 
+import { LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
@@ -59,14 +60,19 @@ export function TenantBooking({
     reference: string;
     hold_expires_at: string;
     guest_token: string;
+    court_name: string;
+    payment_methods: Method[];
   } | null>(null);
+  const availableMethods = booking?.payment_methods ?? methods;
   const [methodId, setMethodId] = useState(
     () => methods.find((method) => method.mode === "manual")?.id ?? "",
   );
   const [proof, setProof] = useState<File | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const court = courts.find((item) => item.id === courtId);
-  const selectedMethod = methods.find((method) => method.id === methodId);
+  const selectedMethod = availableMethods.find(
+    (method) => method.id === methodId,
+  );
   const totalAmountMinor = (court?.hourly_rate_minor ?? 0) * durationHours;
   const proofLabel =
     selectedMethod?.provider === "gcash"
@@ -186,6 +192,11 @@ export function TenantBooking({
       if (!response.ok)
         throw new Error(result.error ?? "Unable to hold this court.");
       setBooking(result.booking);
+      setMethodId(
+        result.booking.payment_methods?.find(
+          (method: Method) => method.mode === "manual",
+        )?.id ?? "",
+      );
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Booking failed.");
     } finally {
@@ -265,8 +276,9 @@ export function TenantBooking({
               Proof sent for review
             </h2>
             <p className="mt-3">
-              Reference: <strong>{booking?.reference}</strong>. The venue will
-              review your payment before confirming the court.
+              <strong>{booking?.court_name}</strong> · Reference:{" "}
+              <strong>{booking?.reference}</strong>. The venue will review your
+              payment before confirming the court.
             </p>
           </section>
         ) : booking ? (
@@ -275,6 +287,8 @@ export function TenantBooking({
               Court held · {booking.reference}
             </h2>
             <p className="mt-2 text-[#718076]">
+              Court:{" "}
+              <strong className="text-[#17231b]">{booking.court_name}</strong>.
               Hold expires{" "}
               {new Date(booking.hold_expires_at).toLocaleString("en-PH", {
                 timeZone: venue.timezone,
@@ -282,16 +296,16 @@ export function TenantBooking({
               . {durationHours}-hour booking. Amount due:{" "}
               {money(totalAmountMinor)}.
             </p>
-            {methods.length ? (
+            {availableMethods.length ? (
               <form onSubmit={submitProof} className="mt-6 grid max-w-xl gap-4">
                 <fieldset className="grid gap-3">
                   <legend className="mb-2 font-bold">Pay to your venue</legend>
-                  {methods
+                  {availableMethods
                     .filter((method) => method.mode === "manual")
                     .map((method) => (
                       <label
                         key={method.id}
-                        className={`rounded-xl border p-4 ${methodId === method.id ? "border-[#235c43] bg-[#eff6ef]" : ""}`}
+                        className={`cursor-pointer rounded-xl border p-4 ${methodId === method.id ? "border-[#235c43] bg-[#eff6ef]" : ""}`}
                       >
                         <input
                           required
@@ -317,7 +331,7 @@ export function TenantBooking({
                       </label>
                     ))}
                 </fieldset>
-                {methods.some((m) => m.mode === "manual") && (
+                {availableMethods.some((m) => m.mode === "manual") && (
                   <>
                     <label className="rounded-xl border border-[#c9d8cc] bg-[#f6faf6] p-4 font-bold">
                       {proofLabel}
@@ -358,9 +372,14 @@ export function TenantBooking({
                       disabled={loading || !methodId || !proof}
                       className="sticky bottom-4 z-10 rounded-xl bg-[#235c43] p-4 font-bold text-white shadow-lg disabled:opacity-50"
                     >
-                      {loading
-                        ? "Submitting…"
-                        : `Submit ${selectedMethod?.provider === "gcash" ? "GCash " : ""}proof`}
+                      {loading ? (
+                        <span className="inline-flex items-center justify-center gap-2">
+                          <LoaderCircle className="size-5 animate-spin" />
+                          Submitting…
+                        </span>
+                      ) : (
+                        `Submit ${selectedMethod?.provider === "gcash" ? "GCash " : ""}proof`
+                      )}
                     </button>
                   </>
                 )}
@@ -507,7 +526,14 @@ export function TenantBooking({
                 disabled={hour === null || loading || !courts.length}
                 className="mt-5 w-full rounded-xl bg-[#235c43] p-4 font-bold text-white disabled:opacity-50"
               >
-                {loading ? "Holding…" : "Hold slot & continue"}
+                {loading ? (
+                  <span className="inline-flex items-center justify-center gap-2">
+                    <LoaderCircle className="size-5 animate-spin" />
+                    Holding…
+                  </span>
+                ) : (
+                  "Hold slot & continue"
+                )}
               </button>
               <p className="mt-3 text-xs text-[#718076]">
                 Your slot is held when you continue, including during manual

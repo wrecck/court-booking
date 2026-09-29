@@ -1,9 +1,11 @@
 import { requireTenant } from "@/lib/tenants";
 import {
+  deletePaymentMethod,
   savePaymentMethod,
   togglePaymentMethod,
   updatePaymentSettings,
 } from "./actions";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function PaymentSettingsPage() {
   const { supabase, organization, role } = await requireTenant();
@@ -48,17 +50,34 @@ export default async function PaymentSettingsPage() {
                     </p>
                   </div>
                   {edit && (
-                    <form action={togglePaymentMethod}>
-                      <input type="hidden" name="id" value={method.id} />
-                      <input
-                        type="hidden"
-                        name="enabled"
-                        value={String(!method.is_enabled)}
-                      />
-                      <button className="rounded-lg border px-3 py-2 text-sm font-bold">
-                        {method.is_enabled ? "Disable" : "Enable"}
-                      </button>
-                    </form>
+                    <div className="flex gap-2">
+                      <form action={togglePaymentMethod}>
+                        <input type="hidden" name="id" value={method.id} />
+                        <input
+                          type="hidden"
+                          name="enabled"
+                          value={String(!method.is_enabled)}
+                        />
+                        <SubmitButton
+                          pendingText={
+                            method.is_enabled ? "Disabling…" : "Enabling…"
+                          }
+                          className="rounded-lg border px-3 py-2 text-sm font-bold disabled:opacity-60"
+                        >
+                          {method.is_enabled ? "Disable" : "Enable"}
+                        </SubmitButton>
+                      </form>
+                      <form action={deletePaymentMethod}>
+                        <input type="hidden" name="id" value={method.id} />
+                        <SubmitButton
+                          pendingText="Deleting…"
+                          confirmMessage={`Delete ${method.display_name}? This cannot be undone.`}
+                          className="rounded-lg border border-red-300 px-3 py-2 text-sm font-bold text-red-700 disabled:opacity-60"
+                        >
+                          Delete
+                        </SubmitButton>
+                      </form>
+                    </div>
                   )}
                 </div>
               ))}
@@ -109,9 +128,12 @@ export default async function PaymentSettingsPage() {
                 placeholder="Payment instructions"
                 className="rounded-lg border p-3"
               />
-              <button className="rounded-lg bg-[#235c43] p-3 font-bold text-white sm:col-span-2">
+              <SubmitButton
+                pendingText="Adding…"
+                className="rounded-lg bg-[#235c43] p-3 font-bold text-white disabled:opacity-60 sm:col-span-2"
+              >
                 Add payment method
-              </button>
+              </SubmitButton>
             </form>
           )}
         </section>
@@ -151,9 +173,12 @@ export default async function PaymentSettingsPage() {
                   className="mt-2 block rounded-lg border p-3"
                 />
               </label>
-              <button className="rounded-lg bg-[#235c43] p-3 font-bold text-white">
+              <SubmitButton
+                pendingText="Saving…"
+                className="rounded-lg bg-[#235c43] p-3 font-bold text-white disabled:opacity-60"
+              >
                 Save
-              </button>
+              </SubmitButton>
             </form>
           )}
         </section>

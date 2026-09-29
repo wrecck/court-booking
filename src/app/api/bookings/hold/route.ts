@@ -20,19 +20,34 @@ export async function POST(request: Request) {
   }
   const input = parsed.data;
   const supabase = createAdminClient();
-  const { data: court } = await supabase
-    .from("courts")
-    .select("hourly_rate_minor,organization_id,is_active")
-    .eq("id", input.courtId)
-    .eq("organization_id", input.organizationId)
-    .eq("is_active", true)
-    .maybeSingle();
-  const { data: venue } = await supabase
-    .from("organizations")
-    .select("currency,is_active,max_booking_hours")
-    .eq("id", input.organizationId)
-    .eq("is_active", true)
-    .maybeSingle();
+  const [
+    { data: court },
+    { data: venue },
+    { data: paymentMethods, error: paymentMethodsError },
+  ] = await Promise.all([
+    supabase
+      .from("courts")
+      .select("name,hourly_rate_minor,organization_id,is_active")
+      .eq("id", input.courtId)
+      .eq("organization_id", input.organizationId)
+      .eq("is_active", true)
+      .maybeSingle(),
+    supabase
+      .from("organizations")
+      .select("currency,is_active,max_booking_hours")
+      .eq("id", input.organizationId)
+      .eq("is_active", true)
+      .maybeSingle(),
+    supabase
+      .from("venue_payment_methods")
+      .select(
+        "id,display_name,mode,provider,account_name,account_number,bank_name,instructions",
+      )
+      .eq("organization_id", input.organizationId)
+      .eq("mode", "manual")
+      .eq("is_enabled", true)
+      .order("display_order"),
+  ]);
   if (!court || !venue)
     return Response.json(
       { error: "Venue or court not found." },
@@ -52,6 +67,12 @@ export async function POST(request: Request) {
         error: `Choose a future booking of up to ${venue.max_booking_hours} ${venue.max_booking_hours === 1 ? "hour" : "hours"}.`,
       },
       { status: 400 },
+    );
+  }
+  if (paymentMethodsError) {
+    return Response.json(
+      { error: "Payment details could not be loaded." },
+      { status: 500 },
     );
   }
   const { data, error } = await supabase.rpc("create_booking_hold", {
@@ -78,8 +99,16 @@ export async function POST(request: Request) {
       { status: conflict ? 409 : 500 },
     );
   }
+
+  const booking = Array.isArray(data) ? data[0] : data;
   return Response.json(
-    { booking: Array.isArray(data) ? data[0] : data },
+    {
+      booking: {
+        ...booking,
+        court_name: court.name,
+        payment_methods: paymentMethods ?? [],
+      },
+    },
     { status: 201 },
   );
 }

@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { signOut } from "@/app/login/actions";
 import { updateTenant } from "./actions";
 import { switchTenant } from "@/app/admin/actions";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function PlatformPage() {
   await requireOperator();
@@ -47,7 +48,12 @@ export default async function PlatformPage() {
               Venue dashboard
             </Link>
             <form action={signOut}>
-              <button className="font-bold text-[#235c43]">Sign out</button>
+              <SubmitButton
+                pendingText="Signing out…"
+                className="font-bold text-[#235c43] disabled:opacity-60"
+              >
+                Sign out
+              </SubmitButton>
             </form>
           </div>
         </header>
@@ -82,9 +88,12 @@ export default async function PlatformPage() {
                   <div className="mt-3 flex flex-wrap gap-4">
                     <form action={switchTenant}>
                       <input type="hidden" name="tenantId" value={tenant.id} />
-                      <button className="text-sm font-bold text-[#235c43] underline">
+                      <SubmitButton
+                        pendingText="Opening…"
+                        className="text-sm font-bold text-[#235c43] underline disabled:opacity-60"
+                      >
                         Manage venue
-                      </button>
+                      </SubmitButton>
                     </form>
                     <Link
                       href={`/tenant/${tenant.slug}`}
@@ -129,9 +138,12 @@ export default async function PlatformPage() {
                     />
                     Active
                   </label>
-                  <button className="rounded-lg bg-[#235c43] px-4 py-2.5 text-sm font-bold text-white">
+                  <SubmitButton
+                    pendingText="Saving…"
+                    className="rounded-lg bg-[#235c43] px-4 py-2.5 text-sm font-bold text-white disabled:opacity-60"
+                  >
                     Save
-                  </button>
+                  </SubmitButton>
                 </form>
               </div>
             </article>
