@@ -3,14 +3,150 @@ import { requireOperator } from "@/lib/tenants";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { signOut } from "@/app/login/actions";
 import { updateTenant } from "./actions";
+import { switchTenant } from "@/app/admin/actions";
 
 export default async function PlatformPage() {
   await requireOperator();
   const admin = createAdminClient();
-  const { data: tenants, error } = await admin.from("organizations").select("id,name,slug,is_active,created_at,initial_hold_minutes,manual_review_minutes").order("created_at", { ascending: false });
+  const { data: tenants, error } = await admin
+    .from("organizations")
+    .select(
+      "id,name,slug,is_active,created_at,initial_hold_minutes,manual_review_minutes",
+    )
+    .order("created_at", { ascending: false });
   if (error) throw new Error("Unable to load tenants.");
   const ids = (tenants ?? []).map((tenant) => tenant.id);
-  const { data: members } = ids.length ? await admin.from("organization_members").select("organization_id,user_id,role").in("organization_id", ids).eq("role", "owner") : { data: [] };
-  const { data: courts } = ids.length ? await admin.from("courts").select("organization_id").in("organization_id", ids) : { data: [] };
-  return <main className="min-h-screen bg-[#f3f5f1] px-5 py-10 sm:px-8"><div className="mx-auto max-w-6xl"><header className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs font-extrabold uppercase tracking-widest text-[#235c43]">Courtly platform</p><h1 className="display mt-2 text-4xl font-extrabold">Tenants</h1><p className="mt-2 text-[#718076]">{tenants?.length ?? 0} venues registered</p></div><div className="flex gap-4"><Link href="/admin" className="font-bold text-[#235c43]">Venue dashboard</Link><form action={signOut}><button className="font-bold text-[#235c43]">Sign out</button></form></div></header><div className="mt-8 grid gap-5">{tenants?.map((tenant) => <article key={tenant.id} className="rounded-2xl border border-[#dce4da] bg-white p-6"><div className="flex flex-wrap items-start justify-between gap-4"><div><div className="flex items-center gap-3"><h2 className="display text-xl font-extrabold">{tenant.name}</h2><span className={`rounded-full px-3 py-1 text-xs font-bold ${tenant.is_active ? "bg-[#e5f0e7] text-[#235c43]" : "bg-[#fff0eb] text-[#a44b34]"}`}>{tenant.is_active ? "Active" : "Paused"}</span></div><p className="mt-2 text-sm text-[#718076]">/{tenant.slug} · {new Date(tenant.created_at).toLocaleDateString()} · {courts?.filter((c) => c.organization_id === tenant.id).length ?? 0} courts · {members?.filter((m) => m.organization_id === tenant.id).length ?? 0} owners</p><Link href={`/tenant/${tenant.slug}`} className="mt-3 inline-block text-sm font-bold text-[#235c43] underline">View booking page</Link></div><form action={updateTenant} className="flex flex-wrap items-end gap-3"><input type="hidden" name="id" value={tenant.id} /><label className="text-xs font-bold">Initial hold (min)<input name="initial" type="number" min="5" max="60" defaultValue={tenant.initial_hold_minutes} className="mt-1 block w-24 rounded-lg border p-2" /></label><label className="text-xs font-bold">Review hold (min)<input name="review" type="number" min="10" max="1440" defaultValue={tenant.manual_review_minutes} className="mt-1 block w-24 rounded-lg border p-2" /></label><label className="flex items-center gap-2 pb-2 text-xs font-bold"><input type="checkbox" name="active" defaultChecked={tenant.is_active} />Active</label><button className="rounded-lg bg-[#235c43] px-4 py-2.5 text-sm font-bold text-white">Save</button></form></div></article>)}{!tenants?.length && <p className="rounded-2xl bg-white p-8">No tenants yet. <Link className="underline" href="/register">Create a venue</Link>.</p>}</div></div></main>;
+  const { data: members } = ids.length
+    ? await admin
+        .from("organization_members")
+        .select("organization_id,user_id,role")
+        .in("organization_id", ids)
+        .eq("role", "owner")
+    : { data: [] };
+  const { data: courts } = ids.length
+    ? await admin
+        .from("courts")
+        .select("organization_id")
+        .in("organization_id", ids)
+    : { data: [] };
+  return (
+    <main className="min-h-screen bg-[#f3f5f1] px-5 py-10 sm:px-8">
+      <div className="mx-auto max-w-6xl">
+        <header className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-extrabold uppercase tracking-widest text-[#235c43]">
+              Courtly platform
+            </p>
+            <h1 className="display mt-2 text-4xl font-extrabold">Tenants</h1>
+            <p className="mt-2 text-[#718076]">
+              {tenants?.length ?? 0} venues registered
+            </p>
+          </div>
+          <div className="flex gap-4">
+            <Link href="/admin" className="font-bold text-[#235c43]">
+              Venue dashboard
+            </Link>
+            <form action={signOut}>
+              <button className="font-bold text-[#235c43]">Sign out</button>
+            </form>
+          </div>
+        </header>
+        <div className="mt-8 grid gap-5">
+          {tenants?.map((tenant) => (
+            <article
+              key={tenant.id}
+              className="rounded-2xl border border-[#dce4da] bg-white p-6"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <h2 className="display text-xl font-extrabold">
+                      {tenant.name}
+                    </h2>
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-bold ${tenant.is_active ? "bg-[#e5f0e7] text-[#235c43]" : "bg-[#fff0eb] text-[#a44b34]"}`}
+                    >
+                      {tenant.is_active ? "Active" : "Paused"}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm text-[#718076]">
+                    /{tenant.slug} ·{" "}
+                    {new Date(tenant.created_at).toLocaleDateString()} ·{" "}
+                    {courts?.filter((c) => c.organization_id === tenant.id)
+                      .length ?? 0}{" "}
+                    courts ·{" "}
+                    {members?.filter((m) => m.organization_id === tenant.id)
+                      .length ?? 0}{" "}
+                    owners
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-4">
+                    <form action={switchTenant}>
+                      <input type="hidden" name="tenantId" value={tenant.id} />
+                      <button className="text-sm font-bold text-[#235c43] underline">
+                        Manage venue
+                      </button>
+                    </form>
+                    <Link
+                      href={`/tenant/${tenant.slug}`}
+                      className="text-sm font-bold text-[#235c43] underline"
+                    >
+                      View booking page
+                    </Link>
+                  </div>
+                </div>
+                <form
+                  action={updateTenant}
+                  className="flex flex-wrap items-end gap-3"
+                >
+                  <input type="hidden" name="id" value={tenant.id} />
+                  <label className="text-xs font-bold">
+                    Initial hold (min)
+                    <input
+                      name="initial"
+                      type="number"
+                      min="5"
+                      max="60"
+                      defaultValue={tenant.initial_hold_minutes}
+                      className="mt-1 block w-24 rounded-lg border p-2"
+                    />
+                  </label>
+                  <label className="text-xs font-bold">
+                    Review hold (min)
+                    <input
+                      name="review"
+                      type="number"
+                      min="10"
+                      max="1440"
+                      defaultValue={tenant.manual_review_minutes}
+                      className="mt-1 block w-24 rounded-lg border p-2"
+                    />
+                  </label>
+                  <label className="flex items-center gap-2 pb-2 text-xs font-bold">
+                    <input
+                      type="checkbox"
+                      name="active"
+                      defaultChecked={tenant.is_active}
+                    />
+                    Active
+                  </label>
+                  <button className="rounded-lg bg-[#235c43] px-4 py-2.5 text-sm font-bold text-white">
+                    Save
+                  </button>
+                </form>
+              </div>
+            </article>
+          ))}
+          {!tenants?.length && (
+            <p className="rounded-2xl bg-white p-8">
+              No tenants yet.{" "}
+              <Link className="underline" href="/register">
+                Create a venue
+              </Link>
+              .
+            </p>
+          )}
+        </div>
+      </div>
+    </main>
+  );
 }

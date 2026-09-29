@@ -15,7 +15,7 @@ export default async function CourtSettingsPage() {
       .eq("id", organization.id)
       .single(),
   ]);
-  const canEdit = role === "owner" || role === "admin";
+  const canEdit = ["owner", "admin", "platform_operator"].includes(role);
   return (
     <main className="mx-auto max-w-5xl">
       <h1 className="display text-3xl font-extrabold">Courts</h1>

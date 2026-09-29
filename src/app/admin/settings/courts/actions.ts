@@ -5,7 +5,7 @@ import { requireTenant } from "@/lib/tenants";
 
 export async function saveCourt(formData: FormData) {
   const { supabase, organization, role } = await requireTenant();
-  if (!["owner", "admin"].includes(role))
+  if (!["owner", "admin", "platform_operator"].includes(role))
     throw new Error("Only venue admins can edit courts.");
   const name = String(formData.get("name") ?? "").trim();
   const surface = String(formData.get("surface") ?? "").trim();
@@ -40,13 +40,11 @@ export async function saveCourt(formData: FormData) {
       .limit(1)
       .single();
     if (!location) throw new Error("Venue location missing.");
-    const { error } = await supabase
-      .from("courts")
-      .insert({
-        ...values,
-        organization_id: organization.id,
-        location_id: location.id,
-      });
+    const { error } = await supabase.from("courts").insert({
+      ...values,
+      organization_id: organization.id,
+      location_id: location.id,
+    });
     if (error) throw new Error("Unable to add court.");
   }
   revalidatePath("/admin/settings/courts");
@@ -55,7 +53,7 @@ export async function saveCourt(formData: FormData) {
 
 export async function saveBookingRules(formData: FormData) {
   const { supabase, organization, role } = await requireTenant();
-  if (!["owner", "admin"].includes(role))
+  if (!["owner", "admin", "platform_operator"].includes(role))
     throw new Error("Only venue admins can edit booking rules.");
   const maxBookingHours = Number(formData.get("maxBookingHours"));
   if (
