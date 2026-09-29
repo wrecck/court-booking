@@ -63,6 +63,47 @@ export async function updatePaymentSettings(formData: FormData) {
   revalidatePath("/admin/settings/payments");
 }
 
+export async function updatePaymentMethod(formData: FormData) {
+  const { supabase, organization, role } = await requireTenant();
+  if (!["owner", "admin", "platform_operator"].includes(role))
+    throw new Error("Only venue admins can change payment settings.");
+  const id = String(formData.get("id") ?? "");
+  const displayName = String(formData.get("displayName") ?? "").trim();
+  const provider = String(formData.get("provider") ?? "");
+  const accountName = String(formData.get("accountName") ?? "").trim();
+  const accountNumber = String(formData.get("accountNumber") ?? "").trim();
+  if (
+    displayName.length < 3 ||
+    displayName.length > 80 ||
+    !/^(gcash|bank)$/.test(provider) ||
+    accountName.length < 2 ||
+    accountNumber.length < 5
+  )
+    throw new Error("Complete the payment recipient details.");
+  const { data, error } = await supabase
+    .from("venue_payment_methods")
+    .update({
+      display_name: displayName,
+      provider,
+      type: provider === "gcash" ? "ewallet" : "bank_transfer",
+      account_name: accountName,
+      account_number: accountNumber,
+      bank_name:
+        provider === "bank"
+          ? String(formData.get("bankName") ?? "").trim()
+          : null,
+      instructions: String(formData.get("instructions") ?? "").trim(),
+    })
+    .eq("id", id)
+    .eq("organization_id", organization.id)
+    .eq("mode", "manual")
+    .select("id")
+    .maybeSingle();
+  if (error || !data) throw new Error("Unable to update payment method.");
+  revalidatePath("/admin/settings/payments");
+  revalidatePath(`/tenant/${organization.slug}`);
+}
+
 export async function togglePaymentMethod(formData: FormData) {
   const { supabase, organization, role } = await requireTenant();
   if (!["owner", "admin", "platform_operator"].includes(role))

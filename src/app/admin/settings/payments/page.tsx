@@ -1,11 +1,7 @@
 import { requireTenant } from "@/lib/tenants";
-import {
-  deletePaymentMethod,
-  savePaymentMethod,
-  togglePaymentMethod,
-  updatePaymentSettings,
-} from "./actions";
+import { savePaymentMethod, updatePaymentSettings } from "./actions";
 import { SubmitButton } from "@/components/submit-button";
+import { PaymentMethodRow } from "@/components/payment-method-row";
 
 export default async function PaymentSettingsPage() {
   const { supabase, organization, role } = await requireTenant();
@@ -13,7 +9,7 @@ export default async function PaymentSettingsPage() {
     supabase
       .from("venue_payment_methods")
       .select(
-        "id,display_name,account_name,account_number,bank_name,mode,connection_status,is_enabled",
+        "id,display_name,provider,account_name,account_number,bank_name,instructions,mode,connection_status,is_enabled",
       )
       .eq("organization_id", organization.id)
       .order("display_order"),
@@ -37,50 +33,19 @@ export default async function PaymentSettingsPage() {
           <div className="mt-4 divide-y">
             {methods
               ?.filter((m) => m.mode === "manual")
-              .map((method) => (
-                <div
-                  key={method.id}
-                  className="flex flex-wrap items-center justify-between gap-3 py-4"
-                >
-                  <div>
+              .map((method) =>
+                edit ? (
+                  <PaymentMethodRow key={method.id} method={method} />
+                ) : (
+                  <div key={method.id} className="py-4">
                     <strong>{method.display_name}</strong>
                     <p className="text-sm text-[#718076]">
-                      {method.bank_name} {method.account_name} ·{" "}
-                      {method.account_number}
+                      {method.bank_name ? `${method.bank_name} · ` : ""}
+                      {method.account_name} · {method.account_number}
                     </p>
                   </div>
-                  {edit && (
-                    <div className="flex gap-2">
-                      <form action={togglePaymentMethod}>
-                        <input type="hidden" name="id" value={method.id} />
-                        <input
-                          type="hidden"
-                          name="enabled"
-                          value={String(!method.is_enabled)}
-                        />
-                        <SubmitButton
-                          pendingText={
-                            method.is_enabled ? "Disabling…" : "Enabling…"
-                          }
-                          className="rounded-lg border px-3 py-2 text-sm font-bold disabled:opacity-60"
-                        >
-                          {method.is_enabled ? "Disable" : "Enable"}
-                        </SubmitButton>
-                      </form>
-                      <form action={deletePaymentMethod}>
-                        <input type="hidden" name="id" value={method.id} />
-                        <SubmitButton
-                          pendingText="Deleting…"
-                          confirmMessage={`Delete ${method.display_name}? This cannot be undone.`}
-                          className="rounded-lg border border-red-300 px-3 py-2 text-sm font-bold text-red-700 disabled:opacity-60"
-                        >
-                          Delete
-                        </SubmitButton>
-                      </form>
-                    </div>
-                  )}
-                </div>
-              ))}
+                ),
+              )}
             {!methods?.some((m) => m.mode === "manual") && (
               <p className="py-4 text-sm text-[#718076]">
                 Add a GCash number or bank account to accept payments.

@@ -1,16 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   CalendarRange,
   CreditCard,
   LayoutDashboard,
+  LoaderCircle,
   Menu,
   Settings,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { cn } from "@/lib/utils";
 import { signOut } from "@/app/login/actions";
@@ -41,7 +42,31 @@ export function AdminShell({
   tenants: Array<{ id: string; name: string; slug: string }>;
 }) {
   const path = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [navigationTarget, setNavigationTarget] = useState<string | null>(null);
+  const [navigationPending, startNavigation] = useTransition();
+  const navigatingTo = navigationPending ? navigationTarget : null;
+
+  function beginNavigation(
+    event: React.MouseEvent<HTMLAnchorElement>,
+    target: string,
+  ) {
+    setOpen(false);
+    if (
+      target === path ||
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    )
+      return;
+    event.preventDefault();
+    setNavigationTarget(target);
+    startNavigation(() => router.push(target));
+  }
   return (
     <div className="min-h-screen bg-[#f3f5f1]">
       <aside
@@ -91,9 +116,19 @@ export function AdminShell({
               )}
               <Link
                 href={`/tenant/${venueSlug}`}
+                onClick={(event) =>
+                  beginNavigation(event, `/tenant/${venueSlug}`)
+                }
                 className="mt-1 block text-xs text-white/55 hover:text-white"
               >
-                View booking page →
+                <span className="inline-flex items-center gap-1.5">
+                  View booking page
+                  {navigatingTo === `/tenant/${venueSlug}` ? (
+                    <LoaderCircle className="size-3.5 animate-spin" />
+                  ) : (
+                    "→"
+                  )}
+                </span>
               </Link>
             </span>
           </div>
@@ -106,7 +141,8 @@ export function AdminShell({
               <Link
                 key={href}
                 href={href}
-                onClick={() => setOpen(false)}
+                onClick={(event) => beginNavigation(event, href)}
+                aria-busy={navigatingTo === href}
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-bold transition",
                   active
@@ -116,6 +152,12 @@ export function AdminShell({
               >
                 <Icon size={19} />
                 <span className="flex-1">{label}</span>
+                {navigatingTo === href && (
+                  <LoaderCircle
+                    aria-label={`Opening ${label}`}
+                    className="size-4 animate-spin"
+                  />
+                )}
               </Link>
             );
           })}
@@ -124,9 +166,15 @@ export function AdminShell({
           {operator && (
             <Link
               href="/platform"
+              onClick={(event) => beginNavigation(event, "/platform")}
               className="block text-sm font-bold text-white"
             >
-              Platform backend
+              <span className="inline-flex items-center gap-2">
+                Platform backend
+                {navigatingTo === "/platform" && (
+                  <LoaderCircle className="size-4 animate-spin" />
+                )}
+              </span>
             </Link>
           )}
           <form action={signOut}>
@@ -151,9 +199,17 @@ export function AdminShell({
           <div className="ml-auto flex items-center gap-3">
             <Link
               href={`/tenant/${venueSlug}`}
+              onClick={(event) =>
+                beginNavigation(event, `/tenant/${venueSlug}`)
+              }
               className="text-sm font-bold text-[#235c43]"
             >
-              Booking page
+              <span className="inline-flex items-center gap-2">
+                Booking page
+                {navigatingTo === `/tenant/${venueSlug}` && (
+                  <LoaderCircle className="size-4 animate-spin" />
+                )}
+              </span>
             </Link>
             <span className="grid size-10 place-items-center rounded-full bg-[#d7e5d7] text-sm font-extrabold text-[#235c43]">
               {venueName.charAt(0)}
