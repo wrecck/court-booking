@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   CalendarRange,
   CreditCard,
+  FileBarChart,
   LayoutDashboard,
   LoaderCircle,
   Menu,
@@ -22,6 +23,7 @@ const nav = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/bookings", label: "Bookings", icon: CalendarRange },
   { href: "/admin/payments", label: "Payment review", icon: CreditCard },
+  { href: "/admin/reports", label: "Reports", icon: FileBarChart },
   { href: "/admin/settings/courts", label: "Courts", icon: CalendarRange },
   { href: "/admin/settings/payments", label: "Settings", icon: Settings },
 ];
@@ -71,7 +73,7 @@ export function AdminShell({
     <div className="min-h-screen bg-[#f3f5f1]">
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 w-[270px] bg-[#173f2c] p-5 text-white transition-transform lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-40 w-[270px] bg-[#173f2c] p-5 text-white transition-transform print:hidden lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
@@ -187,8 +189,8 @@ export function AdminShell({
           </form>
         </div>
       </aside>
-      <div className="lg:pl-[270px]">
-        <header className="sticky top-0 z-30 flex h-[72px] items-center justify-between border-b border-[#dfe4dc] bg-white/90 px-5 backdrop-blur sm:px-8">
+      <div className="print:pl-0 lg:pl-[270px]">
+        <header className="sticky top-0 z-30 flex h-[72px] items-center justify-between border-b border-[#dfe4dc] bg-white/90 px-5 backdrop-blur print:hidden sm:px-8">
           <button onClick={() => setOpen(true)} className="lg:hidden">
             <Menu />
           </button>
@@ -216,7 +218,7 @@ export function AdminShell({
             </span>
           </div>
         </header>
-        <main className="p-5 sm:p-8 lg:p-10">{children}</main>
+        <main className="p-5 print:p-0 sm:p-8 lg:p-10">{children}</main>
       </div>
     </div>
   );

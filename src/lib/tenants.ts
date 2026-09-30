@@ -8,6 +8,7 @@ type Tenant = {
   id: string;
   name: string;
   slug: string;
+  currency: string;
   is_active: boolean;
 };
 
@@ -34,7 +35,7 @@ export const requireTenant = cache(async function requireTenant() {
       .order("created_at", { ascending: true }),
     supabase
       .from("organizations")
-      .select("id,name,slug,is_active")
+      .select("id,name,slug,currency,is_active")
       .order("created_at", { ascending: true }),
   ]);
   if (operatorError || membershipError || organizationError)
