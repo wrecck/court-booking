@@ -549,11 +549,21 @@ export function TenantBooking({
               <p className="mt-3 text-xs text-[#718076]">
                 Your slot is held when you continue, including during manual
                 payment. By continuing, you agree to the{" "}
-                <Link className="underline" href="/terms">
+                <Link
+                  className="underline"
+                  href="/terms"
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   Terms
                 </Link>{" "}
                 and acknowledge the{" "}
-                <Link className="underline" href="/privacy">
+                <Link
+                  className="underline"
+                  href="/privacy"
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   Privacy Policy
                 </Link>
                 .

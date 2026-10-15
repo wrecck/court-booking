@@ -83,6 +83,8 @@ export default async function RegisterPage({
               <Link
                 className="font-bold text-[#235c43] underline"
                 href="/terms"
+                target="_blank"
+                rel="noreferrer"
               >
                 Terms of Service
               </Link>{" "}
@@ -90,6 +92,8 @@ export default async function RegisterPage({
               <Link
                 className="font-bold text-[#235c43] underline"
                 href="/privacy"
+                target="_blank"
+                rel="noreferrer"
               >
                 Privacy Policy
               </Link>
