@@ -3,11 +3,17 @@ import { LockKeyhole } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { SubmitButton } from "@/components/submit-button";
 import { signIn } from "./actions";
+import { LegalFooter } from "@/components/legal-footer";
+
+export const metadata = {
+  title: "Venue sign in",
+  robots: { index: false, follow: false },
+};
 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; next?: string }>;
+  searchParams: Promise<{ error?: string; success?: string; next?: string }>;
 }) {
   const params = await searchParams;
   return (
@@ -30,6 +36,11 @@ export default async function LoginPage({
             {params.error}
           </p>
         )}
+        {params.success && (
+          <p className="mt-5 rounded-xl bg-[#e5f0e7] p-3 text-sm font-bold text-[#235c43]">
+            {params.success}
+          </p>
+        )}
         <form action={signIn} className="mt-6 space-y-4">
           <input type="hidden" name="next" value={params.next ?? "/admin"} />
           <label className="block">
@@ -42,6 +53,14 @@ export default async function LoginPage({
               className="focus-ring w-full rounded-xl border border-[#dce2dc] bg-[#fafbf9] px-4 py-3 outline-none"
             />
           </label>
+          <div className="text-right">
+            <Link
+              href="/forgot-password"
+              className="text-sm font-bold text-[#235c43] underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <label className="block">
             <span className="mb-2 block text-sm font-bold">Password</span>
             <input
@@ -71,6 +90,9 @@ export default async function LoginPage({
         >
           Return to Courtly
         </Link>
+        <div className="mt-6 border-t border-[#e4e8e3] pt-5">
+          <LegalFooter />
+        </div>
       </div>
     </main>
   );

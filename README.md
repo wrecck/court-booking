@@ -15,10 +15,10 @@ Multi-tenant court booking and payment MVP built with Next.js 16, TypeScript, Ve
 - Idempotent webhook event storage and payment-conflict handling
 - Seed venue and unit tests for booking validation
 - Self-service venue registration and email verification
-- `/tenant/{slug}` public booking pages with real court holds and proof upload
+- `/book/{slug}` public booking pages with real court holds and proof upload
 - Tenant-scoped dashboard and `/platform` operator console
 
-The marketing page, `/book/baseline`, and `/demo/admin` remain a visual demo. `/tenant/{slug}` uses Supabase records and creates real booking holds. Automatic GCash checkout requires a verified gateway and is not enabled in the tenant payment flow yet.
+The marketing page and `/demo/admin` remain a visual demo. `/book/{slug}` uses Supabase records and creates real booking holds. Legacy `/tenant/{slug}` links permanently redirect to the new booking route. Automatic GCash checkout requires a verified gateway and is not enabled in the tenant payment flow yet.
 
 ## Local setup
 
@@ -96,7 +96,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the booking invariant, paym
 - `/login` — Supabase staff login
 - `/register` — register a new venue
 - `/register/complete` — fallback setup for accounts created before automatic provisioning
-- `/tenant/{slug}` — each venue's own booking page
+- `/book/{slug}` — each venue's own booking page
 - `/platform` — operator-only list of venues and hold settings
 
 Add your production URL (`https://court-booking-rho-navy.vercel.app/auth/callback`) to Supabase Auth redirect URLs for email verification. Newly registered venues start with a single court at ₱500 per hour; owners can add manual GCash and bank recipients in `/admin/settings/payments`. The existing Baseline venue owner is bootstrapped as the platform operator.

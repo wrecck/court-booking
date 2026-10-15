@@ -117,15 +117,15 @@ export function AdminShell({
                 </span>
               )}
               <Link
-                href={`/tenant/${venueSlug}`}
+                href={`/book/${venueSlug}`}
                 onClick={(event) =>
-                  beginNavigation(event, `/tenant/${venueSlug}`)
+                  beginNavigation(event, `/book/${venueSlug}`)
                 }
                 className="mt-1 block text-xs text-white/55 hover:text-white"
               >
                 <span className="inline-flex items-center gap-1.5">
                   View booking page
-                  {navigatingTo === `/tenant/${venueSlug}` ? (
+                  {navigatingTo === `/book/${venueSlug}` ? (
                     <LoaderCircle className="size-3.5 animate-spin" />
                   ) : (
                     "→"
@@ -200,15 +200,13 @@ export function AdminShell({
           </div>
           <div className="ml-auto flex items-center gap-3">
             <Link
-              href={`/tenant/${venueSlug}`}
-              onClick={(event) =>
-                beginNavigation(event, `/tenant/${venueSlug}`)
-              }
+              href={`/book/${venueSlug}`}
+              onClick={(event) => beginNavigation(event, `/book/${venueSlug}`)}
               className="text-sm font-bold text-[#235c43]"
             >
               <span className="inline-flex items-center gap-2">
                 Booking page
-                {navigatingTo === `/tenant/${venueSlug}` && (
+                {navigatingTo === `/book/${venueSlug}` && (
                   <LoaderCircle className="size-4 animate-spin" />
                 )}
               </span>

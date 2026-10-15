@@ -48,7 +48,7 @@ export async function saveCourt(formData: FormData) {
     if (error) throw new Error("Unable to add court.");
   }
   revalidatePath("/admin/settings/courts");
-  revalidatePath(`/tenant/${organization.slug}`);
+  revalidatePath(`/book/${organization.slug}`);
 }
 
 export async function saveBookingRules(formData: FormData) {
@@ -68,5 +68,5 @@ export async function saveBookingRules(formData: FormData) {
     .eq("id", organization.id);
   if (error) throw new Error("Unable to save booking rules.");
   revalidatePath("/admin/settings/courts");
-  revalidatePath(`/tenant/${organization.slug}`);
+  revalidatePath(`/book/${organization.slug}`);
 }

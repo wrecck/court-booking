@@ -96,7 +96,7 @@ export default async function PlatformPage() {
                       </SubmitButton>
                     </form>
                     <Link
-                      href={`/tenant/${tenant.slug}`}
+                      href={`/book/${tenant.slug}`}
                       className="text-sm font-bold text-[#235c43] underline"
                     >
                       View booking page

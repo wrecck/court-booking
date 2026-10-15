@@ -37,7 +37,7 @@ export async function savePaymentMethod(formData: FormData) {
   });
   if (error) throw new Error("Unable to add payment method.");
   revalidatePath("/admin/settings/payments");
-  revalidatePath(`/tenant/${organization.slug}`);
+  revalidatePath(`/book/${organization.slug}`);
 }
 
 export async function updatePaymentSettings(formData: FormData) {
@@ -101,7 +101,7 @@ export async function updatePaymentMethod(formData: FormData) {
     .maybeSingle();
   if (error || !data) throw new Error("Unable to update payment method.");
   revalidatePath("/admin/settings/payments");
-  revalidatePath(`/tenant/${organization.slug}`);
+  revalidatePath(`/book/${organization.slug}`);
 }
 
 export async function togglePaymentMethod(formData: FormData) {
@@ -118,7 +118,7 @@ export async function togglePaymentMethod(formData: FormData) {
     .eq("mode", "manual");
   if (error) throw new Error("Unable to update payment method.");
   revalidatePath("/admin/settings/payments");
-  revalidatePath(`/tenant/${organization.slug}`);
+  revalidatePath(`/book/${organization.slug}`);
 }
 
 export async function deletePaymentMethod(formData: FormData) {
@@ -134,5 +134,5 @@ export async function deletePaymentMethod(formData: FormData) {
     .eq("mode", "manual");
   if (error) throw new Error("Unable to delete payment method.");
   revalidatePath("/admin/settings/payments");
-  revalidatePath(`/tenant/${organization.slug}`);
+  revalidatePath(`/book/${organization.slug}`);
 }

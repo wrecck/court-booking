@@ -3,6 +3,7 @@
 import { LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { LegalFooter } from "@/components/legal-footer";
 
 type Venue = {
   id: string;
@@ -500,27 +501,37 @@ export function TenantBooking({
                 {money(totalAmountMinor)}
               </p>
               <div className="mt-5 grid gap-3">
-                <input
-                  name="name"
-                  required
-                  minLength={2}
-                  placeholder="Full name"
-                  className="rounded-xl border p-3"
-                />
-                <input
-                  name="email"
-                  required
-                  type="email"
-                  placeholder="Email"
-                  className="rounded-xl border p-3"
-                />
-                <input
-                  name="phone"
-                  required
-                  minLength={7}
-                  placeholder="Mobile number"
-                  className="rounded-xl border p-3"
-                />
+                <label className="text-sm font-bold">
+                  Full name
+                  <input
+                    name="name"
+                    required
+                    minLength={2}
+                    autoComplete="name"
+                    className="mt-2 block w-full rounded-xl border p-3"
+                  />
+                </label>
+                <label className="text-sm font-bold">
+                  Email
+                  <input
+                    name="email"
+                    required
+                    type="email"
+                    autoComplete="email"
+                    className="mt-2 block w-full rounded-xl border p-3"
+                  />
+                </label>
+                <label className="text-sm font-bold">
+                  Mobile number
+                  <input
+                    name="phone"
+                    required
+                    minLength={7}
+                    type="tel"
+                    autoComplete="tel"
+                    className="mt-2 block w-full rounded-xl border p-3"
+                  />
+                </label>
               </div>
               <button
                 disabled={hour === null || loading || !courts.length}
@@ -537,11 +548,22 @@ export function TenantBooking({
               </button>
               <p className="mt-3 text-xs text-[#718076]">
                 Your slot is held when you continue, including during manual
-                payment.
+                payment. By continuing, you agree to the{" "}
+                <Link className="underline" href="/terms">
+                  Terms
+                </Link>{" "}
+                and acknowledge the{" "}
+                <Link className="underline" href="/privacy">
+                  Privacy Policy
+                </Link>
+                .
               </p>
             </form>
           </div>
         )}
+        <div className="mt-12 border-t border-[#dfe5dc] pt-6">
+          <LegalFooter />
+        </div>
       </div>
     </main>
   );
